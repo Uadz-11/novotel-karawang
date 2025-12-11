@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Kamar - Novotel Karawang</title>
+    <title>Tambah Tamu - Novotel Karawang</title>
     <style>
         * {
             margin: 0;
@@ -37,7 +37,7 @@
             font-weight: bold;
             color: #555;
         }
-        input, select, textarea {
+        input, textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -78,54 +78,34 @@
 </head>
 <body>
     <div class="container">
-        <h1>Edit Data Kamar</h1>
+        <h1>Tambah Data Tamu</h1>
 
-        <form action="{{ route('kamar.update', $kamar->id) }}" method="POST">
+        <form action="{{ route('tamu.store') }}" method="POST">
             @csrf
-            @method('PUT')
 
             <div class="form-group">
-                <label for="nomor_kamar">Nomor Kamar</label>
-                <input type="text" 
-                       id="nomor_kamar" 
-                       name="nomor_kamar" 
-                       value="{{ old('nomor_kamar', $kamar->nomor_kamar) }}" 
-                       required>
+                <label for="nama">Nama Lengkap</label>
+                <input type="text" id="nama" name="nama" required>
             </div>
 
             <div class="form-group">
-                <label for="tipe_kamar">Tipe Kamar</label>
-                <input type="text" 
-                       id="tipe_kamar" 
-                       name="tipe_kamar" 
-                       value="{{ old('tipe_kamar', $kamar->tipe_kamar) }}" 
-                       placeholder="Contoh: Deluxe Room"
-                       required>
+                <label for="alamat">Alamat</label>
+                <textarea id="alamat" name="alamat" rows="3" required></textarea>
             </div>
 
             <div class="form-group">
-                <label for="harga">Harga (Rp)</label>
-                <input type="number" 
-                       id="harga" 
-                       name="harga" 
-                       value="{{ old('harga', $kamar->harga) }}" 
-                       min="0" 
-                       required>
+                <label for="telepon">Telepon</label>
+                <input type="text" id="telepon" name="telepon" required>
             </div>
 
             <div class="form-group">
-                <label for="status">Status</label>
-                <select id="status" name="status" required>
-                    <option value="">Pilih Status</option>
-                    <option value="tersedia" {{ old('status', $kamar->status) == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                    <option value="terisi" {{ old('status', $kamar->status) == 'terisi' ? 'selected' : '' }}>Terisi</option>
-                    <option value="maintenance" {{ old('status', $kamar->status) == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
-                </select>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn">Perbarui</button>
-                <a href="{{ route('kamar.index') }}" class="btn-cancel">Batal</a>
+                <button type="submit" class="btn">Simpan</button>
+                <a href="{{ route('tamu.index') }}" class="btn-cancel">Batal</a>
             </div>
         </form>
     </div>

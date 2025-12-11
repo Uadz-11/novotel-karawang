@@ -2,105 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Reservasi;
 use App\Models\Tamu;
 use App\Models\Kamar;
+use Illuminate\Http\Request;
 
 class ReservasiController extends Controller
 {
-    public function __construct()
-    {
-        // Hanya user dengan role admin atau resepsionis yang bisa akses
-        $this->middleware('auth');
-        $this->middleware('role:admin,resepsionis');
-    }
-
     public function index()
 {
-    return view('reservasi.index');
+    $reservasi = \App\Models\Reservasi::with('tamu', 'kamar')->get();
+    return view('reservasi.index', compact('reservasi'));
 }
+
     public function create()
-    {
-        $tamuList = Tamu::all();
-        $kamarList = Kamar::where('status', 'tersedia')->get();
-        return view('reservasi.create', compact('tamuList', 'kamarList'));
-    }
+{
+    $tamus = \App\Models\Tamu::all();
+    $kamars = \App\Models\Kamar::all();
+    return view('reservasi.create', compact('tamus', 'kamars'));
+}
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'tamu_id' => 'required|exists:tamus,id',
-            'kamar_id' => 'required|exists:kamars,id',
-            'check_in' => 'required|date',
-            'check_out' => 'required|date|after:check_in',
-        ]);
+ public function store(Request $request)
+{
+    $request->validate([
+        'tamu_id'   => 'required|integer|exists:tamus,id',
+        'kamar_id'  => 'required|integer|exists:kamars,id',
+        'check_in'  => 'required|date',
+        'check_out' => 'required|date|after:check_in',
+    ]);
 
-        // misalnya total bayar dihitung berdasarkan harga kamar × lama menginap
-        $kamar = Kamar::find($request->kamar_id);
-        $lama = \Carbon\Carbon::parse($request->check_out)
-                 ->diffInDays(\Carbon\Carbon::parse($request->check_in));
-        $total = $kamar->harga * $lama;
+    $kamar = \App\Models\Kamar::findOrFail($request->kamar_id);
 
-        Reservasi::create([
-            'tamu_id' => $request->tamu_id,
-            'kamar_id' => $request->kamar_id,
-            'check_in' => $request->check_in,
-            'check_out' => $request->check_out,
-            'total_bayar' => $total,
-        ]);
+    $checkIn = \Carbon\Carbon::parse($request->check_in);
+    $checkOut = \Carbon\Carbon::parse($request->check_out);
+    $jumlahHari = $checkOut->diffInDays($checkIn);
 
-        // optional: ubah status kamar ke "terisi"
-        $kamar->status = 'terisi';
-        $kamar->save();
+    $totalBayar = $kamar->harga * $jumlahHari; // ✅ Hitung total bayar
 
-        return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil ditambahkan');
-    }
+    Reservasi::create([
+        'tamu_id'     => $request->tamu_id,
+        'kamar_id'    => $request->kamar_id,
+        'check_in'    => $request->check_in,
+        'check_out'   => $request->check_out,
+        'total_bayar' => $totalBayar, // ✅ Simpan ke database
+    ]);
 
-    public function show(Reservasi $reservasi)
-    {
-        return view('reservasi.show', compact('reservasi'));
-    }
+    return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil ditambahkan.');
+}
 
-    public function edit(Reservasi $reservasi)
-    {
-        $tamuList = Tamu::all();
-        $kamarList = Kamar::all();
-        return view('reservasi.edit', compact('reservasi','tamuList','kamarList'));
-    }
+   public function edit(Reservasi $reservasi)
+{
+    $tamus = \App\Models\Tamu::all();
+    $kamars = \App\Models\Kamar::all();
+    return view('reservasi.edit', compact('reservasi', 'tamus', 'kamars'));
+}
 
     public function update(Request $request, Reservasi $reservasi)
     {
         $request->validate([
-            'tamu_id' => 'required|exists:tamus,id',
-            'kamar_id' => 'required|exists:kamars,id',
-            'check_in' => 'required|date',
-            'check_out' => 'required|date|after:check_in',
+            'tamu_id'   => 'required',
+            'kamar_id'  => 'required',
+            'check_in'  => 'required',
+            'check_out' => 'required',
         ]);
 
-        $kamar = Kamar::find($request->kamar_id);
-        $lama = \Carbon\Carbon::parse($request->check_out)
-                 ->diffInDays(\Carbon\Carbon::parse($request->check_in));
-        $total = $kamar->harga * $lama;
-
-        $reservasi->update([
-            'tamu_id' => $request->tamu_id,
-            'kamar_id' => $request->kamar_id,
-            'check_in' => $request->check_in,
-            'check_out' => $request->check_out,
-            'total_bayar' => $total,
-        ]);
-
+        $reservasi->update($request->all());
         return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil diperbarui');
     }
 
     public function destroy(Reservasi $reservasi)
     {
-        // optional: kembalikan status kamar ke tersedia
-        $kamar = $reservasi->kamar;
-        $kamar->status = 'tersedia';
-        $kamar->save();
-
         $reservasi->delete();
         return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil dihapus');
     }

@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tamu extends Model
 {
-    protected $fillable = ['nama','email','telepon','alamat'];
+    use HasFactory;
 
-    public function reservasi()
-    {
-        return $this->hasMany(Reservasi::class);
-    }
+    protected $fillable = [
+        'nama',
+        'alamat',
+        'telepon',
+        'email',
+    ];
 }

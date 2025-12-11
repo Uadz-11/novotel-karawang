@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reservasi extends Model
 {
-    protected $fillable = ['tamu_id','kamar_id','check_in','check_out','total_bayar'];
+    use HasFactory;
+
+    protected $fillable = [
+        'tamu_id',
+        'kamar_id',
+        'check_in',
+        'check_out',
+        'total_bayar', // ✅ Tambahkan ini!
+    ];
 
     public function tamu()
     {

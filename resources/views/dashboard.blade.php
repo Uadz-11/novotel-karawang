@@ -22,7 +22,6 @@
 </nav>
 
 <div class="container mt-4">
-
     <h3>Selamat Datang, {{ Auth::user()->name }}</h3>
     <p>Role: <strong>{{ Auth::user()->role }}</strong></p>
 
@@ -30,16 +29,16 @@
         <div class="card-header bg-dark text-white">
             Menu Utama
         </div>
-
         <div class="card-body">
-
-            <a href="{{ url('kamar') }}" class="btn btn-primary w-100 mb-2">🏨 Kamar</a>
-            <a href="{{ url('tamu') }}" class="btn btn-success w-100 mb-2">🧍 Tamu</a>
-            <a href="{{ url('reservasi') }}" class="btn btn-info w-100 mb-2">📅 Reservasi</a>
-
+            @if(Auth::user()->role == 'admin')
+                <a href="{{ url('/admin/kamar') }}" class="btn btn-primary w-100 mb-2">🏨 Kamar</a>
+                <a href="{{ url('/admin/tamu') }}" class="btn btn-success w-100 mb-2">🧍 Tamu</a>
+                <a href="{{ url('/admin/reservasi') }}" class="btn btn-info w-100 mb-2">📅 Reservasi</a>
+            @elseif(Auth::user()->role == 'resepsionis')
+                <a href="{{ url('/reservasi') }}" class="btn btn-info w-100 mb-2">📅 Reservasi</a>
+            @endif
         </div>
     </div>
-
 </div>
 
 </body>
